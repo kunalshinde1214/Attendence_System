@@ -33,3 +33,6 @@ A Flask-based web application for tracking student attendance, calculating atten
 
 ## License
 MIT License
+
+## Author
+Kunal Shinde
