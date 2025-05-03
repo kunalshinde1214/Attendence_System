@@ -1,0 +1,1681 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Attendance Alerting System</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.4/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/particles.js/2.0.0/particles.min.js"></script>
+    <style>
+        :root {
+            --primary: #4a00e0;
+            --secondary: #8e2de2;
+            --accent: #6a5af9;
+            --text: #f5f5f5;
+            --dark: #121212;
+            --light: #ffffff;
+            --success: #4CAF50;
+            --warning: #FF9800;
+            --danger: #f44336;
+            --card-bg: rgba(255, 255, 255, 0.1);
+            --gradient-1: linear-gradient(135deg, #4a00e0, #8e2de2);
+            --gradient-2: linear-gradient(135deg, #6a5af9, #4a00e0);
+            --shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            transition: all 0.3s ease-in-out;
+        }
+
+        body {
+            background-color: var(--dark);
+            color: var(--text);
+            min-height: 100vh;
+            overflow-x: hidden;
+            cursor: none;
+        }
+
+        /* Custom Cursor Styles */
+        .cursor {
+            position: fixed;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--gradient-1);
+            pointer-events: none;
+            mix-blend-mode: difference;
+            z-index: 9999;
+            transform: translate(-50%, -50%);
+            transition: transform 0.1s;
+        }
+
+        .cursor-follower {
+            position: fixed;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 2px solid var(--accent);
+            pointer-events: none;
+            z-index: 9998;
+            transform: translate(-50%, -50%);
+            transition: transform 0.3s, width 0.3s, height 0.3s;
+        }
+
+        .cursor-grow {
+            transform: translate(-50%, -50%) scale(2);
+            background: var(--gradient-2);
+            mix-blend-mode: normal;
+        }
+
+        .cursor-follower-grow {
+            width: 50px;
+            height: 50px;
+            border-color: var(--secondary);
+        }
+
+        /* Animation for background particles */
+        #particles-js {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: -1;
+        }
+
+        /* Navbar Styles */
+        nav {
+            background: rgba(18, 18, 18, 0.8);
+            backdrop-filter: blur(10px);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem 5%;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 100;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: var(--gradient-1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .logo i {
+            font-size: 2rem;
+            background: var(--gradient-1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            color: var(--text);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 1.1rem;
+            position: relative;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -5px;
+            left: 0;
+            background: var(--gradient-1);
+            transition: width 0.3s;
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        .auth-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .btn {
+            padding: 0.6rem 1.5rem;
+            border-radius: 50px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .btn-primary {
+            background: var(--gradient-1);
+            color: var(--light);
+            box-shadow: var(--shadow);
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--text);
+            border: 2px solid var(--accent);
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Hero Section with Student Animations */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 8rem 5% 5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-students {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: 0;
+        }
+
+        .student-icon {
+            position: absolute;
+            font-size: 2rem;
+            color: var(--accent);
+            opacity: 0.3;
+            animation: float 8s infinite ease-in-out;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0); }
+            50% { transform: translateY(-30px); }
+            100% { transform: translateY(0); }
+        }
+
+        .hero-content {
+            text-align: center;
+            z-index: 1;
+            animation: fadeIn 1s ease-out;
+        }
+
+        .hero-title {
+            font-size: 3.5rem;
+            font-weight: 800;
+            line-height: 1.2;
+            margin-bottom: 1.5rem;
+        }
+
+        .hero-title span {
+            background: var(--gradient-1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero-subtitle {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+            line-height: 1.6;
+            max-width: 600px;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 1.5rem;
+            justify-content: center;
+            margin-top: 2rem;
+        }
+
+        /* Features Section */
+        .features {
+            padding: 5rem 5%;
+            background: linear-gradient(180deg, var(--dark) 0%, #1a1a2e 100%);
+            position: relative;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 3rem;
+            position: relative;
+            display: inline-block;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            width: 80%;
+            height: 4px;
+            background: var(--gradient-1);
+            bottom: -10px;
+            left: 10%;
+            border-radius: 2px;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .feature-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            transition: transform 0.3s, box-shadow 0.3s;
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(106, 90, 249, 0.1), rgba(74, 0, 224, 0.1));
+            z-index: -1;
+            transition: opacity 0.3s;
+            opacity: 0;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .feature-card:hover::before {
+            opacity: 1;
+        }
+
+        .feature-icon {
+            font-size: 3rem;
+            margin-bottom: 1.5rem;
+            background: var(--gradient-1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            transition: transform 0.3s;
+        }
+
+        .feature-card:hover .feature-icon {
+            transform: scale(1.2);
+        }
+
+        .feature-title {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .feature-desc {
+            opacity: 0.8;
+            line-height: 1.6;
+        }
+
+        /* Calculator Section */
+        .calculator {
+            padding: 5rem 5%;
+            background: linear-gradient(0deg, var(--dark) 0%, #1a1a2e 100%);
+        }
+
+        .calculator-container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .calculator-header {
+            background: var(--gradient-1);
+            padding: 1.5rem 2rem;
+            color: var(--light);
+            text-align: center;
+        }
+
+        .calculator-body {
+            padding: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            color: var(--text);
+            font-size: 1rem;
+            transition: border 0.3s, box-shadow 0.3s;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(106, 90, 249, 0.3);
+        }
+
+        .calculator-result {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 2rem;
+            border-radius: 10px;
+            margin-top: 2rem;
+            text-align: center;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.5s, transform 0.5s;
+        }
+
+        .calculator-result.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .result-title {
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+        }
+
+        .result-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--accent);
+        }
+
+        .result-message {
+            opacity: 0.9;
+            line-height: 1.6;
+        }
+
+        .attendance-status {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            font-weight: 600;
+            margin-top: 1rem;
+        }
+
+        .status-good {
+            background: rgba(76, 175, 80, 0.2);
+            border: 1px solid rgba(76, 175, 80, 0.5);
+            color: #4CAF50;
+        }
+
+        .status-warning {
+            background: rgba(255, 152, 0, 0.2);
+            border: 1px solid rgba(255, 152, 0, 0.5);
+            color: #FF9800;
+        }
+
+        .status-danger {
+            background: rgba(244, 67, 54, 0.2);
+            border: 1px solid rgba(244, 67, 54, 0.5);
+            color: #f44336;
+        }
+
+        /* Dashboard Section */
+        .dashboard {
+            padding: 5rem 5%;
+            background: linear-gradient(180deg, #1a1a2e 0%, var(--dark) 100%);
+        }
+
+        .dashboard-container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .student-filters {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .filter-btn {
+            padding: 0.6rem 1.2rem;
+            border: none;
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .filter-btn.active {
+            background: var(--gradient-1);
+        }
+
+        .students-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+        }
+
+        .students-table th, .students-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .students-table th {
+            background: rgba(0, 0, 0, 0.2);
+            font-weight: 600;
+        }
+
+        .students-table tr:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .status-badge {
+            padding: 0.3rem 0.8rem;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .badge-good {
+            background: rgba(76, 175, 80, 0.2);
+            color: #4CAF50;
+        }
+
+        .badge-warning {
+            background: rgba(255, 152, 0, 0.2);
+            color: #FF9800;
+        }
+
+        .badge-danger {
+            background: rgba(244, 67, 54, 0.2);
+            color: #f44336;
+        }
+
+        .action-btn {
+            padding: 0.3rem 0.8rem;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: 600;
+            background: var(--gradient-1);
+            color: var(--light);
+        }
+
+        /* Statistics Section */
+        .statistics {
+            padding: 5rem 5%;
+            background: linear-gradient(0deg, #1a1a2e 0%, var(--dark) 100%);
+            position: relative;
+        }
+
+        .stats-container {
+            max-width: 1100px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+        }
+
+        .stats-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .stats-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(106, 90, 249, 0.1), rgba(74, 0, 224, 0.1));
+            z-index: -1;
+            transition: opacity 0.3s;
+            opacity: 0;
+        }
+
+        .stats-card:hover::before {
+            opacity: 1;
+        }
+
+        .stats-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            background: var(--gradient-1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .stats-title {
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+            opacity: 0.8;
+        }
+
+        .stats-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            background: var(--gradient-1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .stats-chart-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .stats-chart {
+            width: 100%;
+            height: 300px;
+            position: relative;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 1rem;
+        }
+
+        /* Footer */
+        footer {
+            padding: 3rem 5%;
+            background: rgba(18, 18, 18, 0.8);
+            backdrop-filter: blur(10px);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .footer-content {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .footer-brand {
+            flex: 1;
+            min-width: 240px;
+        }
+
+        .footer-links {
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+        }
+
+        .footer-links h4 {
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+        }
+
+        .footer-links a {
+            color: var(--text);
+            opacity: 0.8;
+            text-decoration: none;
+            transition: opacity 0.3s;
+        }
+
+        .footer-links a:hover {
+            opacity: 1;
+            color: var(--accent);
+        }
+
+        .social-links {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .social-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: transform 0.3s, background 0.3s;
+        }
+
+        .social-icon:hover {
+            transform: translateY(-5px);
+            background: var(--gradient-1);
+        }
+
+        .copyright {
+            text-align: center;
+            margin-top: 3rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            opacity: 0.7;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 992px) {
+            .hero {
+                padding-top: 10rem;
+            }
+
+            .hero-content {
+                width: 100%;
+            }
+
+            .hero-buttons {
+                justify-content: center;
+            }
+
+            .hero-title {
+                font-size: 2.5rem;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .feature-card {
+                padding: 1.5rem;
+            }
+
+            .stats-chart-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 2rem;
+            }
+
+            .section-title {
+                font-size: 2rem;
+            }
+
+            .stats-value {
+                font-size: 2rem;
+            }
+
+            .footer-content {
+                flex-direction: column;
+            }
+        }
+
+        /* Glassmorphism Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 2rem;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+            animation: modalFadeIn 0.3s forwards;
+        }
+
+        @keyframes modalFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--accent);
+            transition: transform 0.3s;
+        }
+
+        .close-modal:hover {
+            transform: rotate(90deg);
+        }
+
+        .notification {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 10px;
+            padding: 1rem 1.5rem;
+            box-shadow: var(--shadow);
+            border-left: 4px solid var(--accent);
+            transform: translateX(150%);
+            transition: transform 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .notification-icon {
+            font-size: 1.5rem;
+            color: var(--accent);
+        }
+
+        /* Loader */
+        .loader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--dark);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.5s, visibility 0.5s;
+        }
+
+        .loader.hidden {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        .loader-animation {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            border: 4px solid transparent;
+            border-top-color: var(--primary);
+            border-bottom-color: var(--secondary);
+            animation: spin 1.5s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Loader -->
+    <div class="loader">
+        <div class="loader-animation"></div>
+    </div>
+
+    <!-- Custom Cursor -->
+    <div class="cursor"></div>
+    <div class="cursor-follower"></div>
+
+    <!-- Particles Background -->
+    <div id="particles-js"></div>
+
+    <!-- Navbar -->
+    <nav>
+        <div class="logo">
+            <i class="fas fa-calendar-check"></i>
+            <span>AttendAlert</span>
+        </div>
+        <div class="nav-links">
+            <a href="#features" class="hover-target">Features</a>
+            <a href="#calculator" class="hover-target">Calculator</a>
+            <a href="#dashboard" class="hover-target">Dashboard</a>
+            <a href="#statistics" class="hover-target">Statistics</a>
+        </div>
+        <div class="auth-buttons">
+            {% if current_user.is_authenticated %}
+                {% if current_user.role == 'student' %}
+                    <a href="{{ url_for('student_profile') }}" class="btn btn-outline hover-target"><i class="fas fa-user"></i> Profile</a>
+                {% else %}
+                    <a href="{{ url_for('teacher_dashboard') }}" class="btn btn-outline hover-target"><i class="fas fa-chalkboard-teacher"></i> Dashboard</a>
+                {% endif %}
+                <a href="{{ url_for('logout') }}" class="btn btn-primary hover-target"><i class="fas fa-sign-out-alt"></i> Logout</a>
+            {% else %}
+                <a href="{{ url_for('login') }}" class="btn btn-outline hover-target"><i class="fas fa-sign-in-alt"></i> Login</a>
+                <a href="{{ url_for('signup') }}" class="btn btn-primary hover-target"><i class="fas fa-user-plus"></i> Sign Up</a>
+            {% endif %}
+        </div>
+    </nav>
+
+    <!-- Hero Section with Student Animations -->
+    <section class="hero" id="home">
+        <div class="hero-students">
+            <!-- Student icons will be added via JavaScript -->
+        </div>
+        <div class="hero-content">
+            <h1 class="hero-title">Student <span>Attendance</span> Alerting System</h1>
+            <p class="hero-subtitle">Stay on track with your academic attendance goals. Our advanced system helps you monitor and improve your attendance with personalized alerts and recommendations.</p>
+            <div class="hero-buttons">
+                <button class="btn btn-primary hover-target"><i class="fas fa-calculator"></i> Calculate Now</button>
+                <button class="btn btn-outline hover-target"><i class="fas fa-info-circle"></i> Learn More</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features" id="features">
+        <h2 class="section-title">Key Features</h2>
+        <div class="features-grid">
+            <div class="feature-card hover-target">
+                <i class="fas fa-calculator feature-icon"></i>
+                <h3 class="feature-title">Attendance Calculator</h3>
+                <p class="feature-desc">Calculate how many lectures you need to attend to reach the 75% attendance threshold using our advanced formula.</p>
+            </div>
+            <div class="feature-card hover-target">
+                <i class="fas fa-bell feature-icon"></i>
+                <h3 class="feature-title">Smart Alerts</h3>
+                <p class="feature-desc">Get timely notifications when your attendance falls below the required threshold to stay on track.</p>
+            </div>
+            <div class="feature-card hover-target">
+                <i class="fas fa-chart-line feature-icon"></i>
+                <h3 class="feature-title">Attendance Analytics</h3>
+                <p class="feature-desc">Track your attendance patterns with visual analytics and identify trends to improve your academic performance.</p>
+            </div>
+            <div class="feature-card hover-target">
+                <i class="fas fa-users feature-icon"></i>
+                <h3 class="feature-title">Class Overview</h3>
+                <p class="feature-desc">For faculty: Get a comprehensive view of class attendance and identify students who need attention.</p>
+            </div>
+            <div class="feature-card hover-target">
+                <i class="fas fa-cloud-upload-alt feature-icon"></i>
+                <h3 class="feature-title">Cloud Sync</h3>
+                <p class="feature-desc">Access your attendance records from any device with seamless cloud synchronization.</p>
+            </div>
+            <div class="feature-card hover-target">
+                <i class="fas fa-file-export feature-icon"></i>
+                <h3 class="feature-title">Reports & Export</h3>
+                <p class="feature-desc">Generate detailed attendance reports and export them in multiple formats for further analysis.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Calculator Section -->
+    <section class="calculator" id="calculator">
+        <h2 class="section-title">Attendance Calculator</h2>
+        <div class="calculator-container">
+            <div class="calculator-header">
+                <h3>Calculate Required Lectures</h3>
+                <p>Find out how many lectures you need to attend to reach 75% attendance</p>
+            </div>
+            <div class="calculator-body">
+                <div class="form-group">
+                    <label class="form-label">Total Lectures Conducted</label>
+                    <input type="number" class="form-control hover-target" id="total-lectures" placeholder="Enter total number of lectures">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Lectures Attended</label>
+                    <input type="number" class="form-control hover-target" id="attended-lectures" placeholder="Enter lectures you've attended">
+                </div>
+                <button class="btn btn-primary hover-target" id="calculate-btn">Calculate</button>
+                
+                <div class="calculator-result" id="calculator-result">
+                    <h4 class="result-title">Your Attendance Status</h4>
+                    <div class="result-value" id="attendance-percentage">0%</div>
+                    <p class="result-message" id="result-message">Enter your attendance details to see your status</p>
+                    <div class="attendance-status" id="attendance-status"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Dashboard Section -->
+    <section class="dashboard" id="dashboard">
+        <h2 class="section-title">Student Dashboard</h2>
+        <div class="dashboard-container">
+            <div class="dashboard-header">
+                <h3>Class Attendance Overview</h3>
+                <button class="btn btn-primary hover-target">
+                    <i class="fas fa-download"></i> Export Report
+                </button>
+            </div>
+            <div class="student-filters">
+                <button class="filter-btn active hover-target">All Students</button>
+                <button class="filter-btn hover-target">Defaulters</button>
+                <button class="filter-btn hover-target">Good Standing</button>
+            </div>
+            <table class="students-table">
+                <thead>
+                    <tr>
+                        <th>Student ID</th>
+                        <th>Name</th>
+                        <th>Total Lectures</th>
+                        <th>Attended</th>
+                        <th>Attendance %</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for student in students %}
+                    <tr class="hover-target">
+                        <td>{{ student.student_id }}</td>
+                        <td>{{ student.name }}</td>
+                        <td>{{ student.total_lectures }}</td>
+                        <td>{{ student.attended_lectures }}</td>
+                        <td>{{ "%.1f" % ((student.attended_lectures / student.total_lectures * 100) if student.total_lectures > 0 else 0) }}%</td>
+                        <td>
+                            {% set percentage = (student.attended_lectures / student.total_lectures * 100) if student.total_lectures > 0 else 0 %}
+                            <span class="status-badge {% if percentage >= 75 %}badge-good{% elif percentage >= 70 %}badge-warning{% else %}badge-danger{% endif %}">
+                                {% if percentage >= 75 %}Good{% elif percentage >= 70 %}Warning{% else %}Defaulter{% endif %}
+                            </span>
+                        </td>
+                        <td><button class="action-btn hover-target" data-id="{{ student.id }}">View</button></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- Statistics Section -->
+    <section class="statistics" id="statistics">
+        <h2 class="section-title">Attendance Statistics</h2>
+        <div class="stats-container">
+            <div class="stats-card hover-target">
+                <i class="fas fa-users stats-icon"></i>
+                <div class="stats-title">Total Students</div>
+                <div class="stats-value">{{ total_students }}</div>
+            </div>
+            <div class="stats-card hover-target">
+                <i class="fas fa-exclamation-triangle stats-icon"></i>
+                <div class="stats-title">Defaulters</div>
+                <div class="stats-value">{{ defaulters }}</div>
+            </div>
+            <div class="stats-card hover-target">
+                <i class="fas fa-chart-pie stats-icon"></i>
+                <div class="stats-title">Avg. Attendance</div>
+                <div class="stats-value">{{ avg_attendance }}%</div>
+            </div>
+            <div class="stats-card hover-target">
+                <i class="fas fa-clock stats-icon"></i>
+                <div class="stats-title">Total Lectures</div>
+                <div class="stats-value">{{ total_lectures }}</div>
+            </div>
+            <div class="stats-card hover-target">
+                <i class="fas fa-arrow-up stats-icon"></i>
+                <div class="stats-title">Attendance Trend</div>
+                <div class="stats-value">+2.5%</div>
+            </div>
+        </div>
+        <div class="stats-chart-container">
+            <div class="stats-chart" id="attendance-chart"></div>
+            <div class="stats-chart" id="trend-chart"></div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-brand">
+                <div class="logo">
+                    <i class="fas fa-calendar-check"></i>
+                    <span>AttendAlert</span>
+                </div>
+                <p style="margin-top: 1rem; opacity: 0.8;">Your comprehensive attendance management solution that helps students stay on track with their academic goals.</p>
+                <div class="social-links">
+                    <a href="#" class="social-icon hover-target"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#" class="social-icon hover-target"><i class="fab fa-twitter"></i></a>
+                    <a href="#" class="social-icon hover-target"><i class="fab fa-instagram"></i></a>
+                    <a href="#" class="social-icon hover-target"><i class="fab fa-linkedin-in"></i></a>
+                </div>
+            </div>
+            <div class="footer-links">
+                <h4>Quick Links</h4>
+                <a href="#home" class="hover-target">Home</a>
+                <a href="#features" class="hover-target">Features</a>
+                <a href="#calculator" class="hover-target">Calculator</a>
+                <a href="#dashboard" class="hover-target">Dashboard</a>
+            </div>
+            <div class="footer-links">
+                <h4>Resources</h4>
+                <a href="#" class="hover-target">Help Center</a>
+                <a href="#" class="hover-target">Documentation</a>
+                <a href="#" class="hover-target">API Reference</a>
+                <a href="#" class="hover-target">Privacy Policy</a>
+            </div>
+            <div class="footer-links">
+                <h4>Contact</h4>
+                <a href="#" class="hover-target">Support</a>
+                <a href="#" class="hover-target">Feedback</a>
+                <a href="#" class="hover-target">Request Feature</a>
+                <a href="#" class="hover-target">Report Issue</a>
+            </div>
+        </div>
+        <div class="copyright">
+            © 2025 AttendAlert. All rights reserved.
+        </div>
+    </footer>
+
+    <!-- Notification Component -->
+    <div class="notification" id="notification">
+        <div class="notification-icon">
+            <i class="fas fa-bell"></i>
+        </div>
+        <div class="notification-content">
+            <strong>Alert!</strong> Your notification message here.
+        </div>
+    </div>
+
+    <!-- Student Info Modal -->
+    <div class="modal" id="student-modal">
+        <div class="modal-content">
+            <span class="close-modal hover-target">×</span>
+            <hVAT2>Student Details</h2>
+            <div class="form-group">
+                <label class="form-label">Student Name</label>
+                <input type="text" class="form-control" id="student-name" readonly>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Current Attendance</label>
+                <input type="text" class="form-control" id="student-attendance" readonly>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Required Lectures</label>
+                <input type="text" class="form-control" id="student-required" readonly>
+            </div>
+            <button class="btn btn-primary">Send Alert</button>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+        // Preloader
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                document.querySelector('.loader').classList.add('hidden');
+            }, 1000);
+        });
+
+        // Custom Cursor
+        const cursor = document.querySelector('.cursor');
+        const cursorFollower = document.querySelector('.cursor-follower');
+        const hoverTargets = document.querySelectorAll('.hover-target');
+
+        document.addEventListener('mousemove', (e) => {
+            cursor.style.left = e.clientX + 'px';
+            cursor.style.top = e.clientY + 'px';
+            
+            setTimeout(() => {
+                cursorFollower.style.left = e.clientX + 'px';
+                cursorFollower.style.top = e.clientY + 'px';
+            }, 100);
+        });
+
+        hoverTargets.forEach(target => {
+            target.addEventListener('mouseenter', () => {
+                cursor.classList.add('cursor-grow');
+                cursorFollower.classList.add('cursor-follower-grow');
+            });
+            
+            target.addEventListener('mouseleave', () => {
+                cursor.classList.remove('cursor-grow');
+                cursorFollower.classList.remove('cursor-follower-grow');
+            });
+        });
+
+        // Student Icons Animation in Hero
+        const heroStudents = document.querySelector('.hero-students');
+        function createStudentIcons() {
+            for (let i = 0; i < 20; i++) {
+                const icon = document.createElement('i');
+                icon.className = 'fas fa-user-graduate student-icon';
+                icon.style.left = `${Math.random() * 100}%`;
+                icon.style.top = `${Math.random() * 100}%`;
+                icon.style.animationDelay = `${Math.random() * 8}s`;
+                heroStudents.appendChild(icon);
+            }
+        }
+        createStudentIcons();
+
+        // Particles.js Background
+        particlesJS('particles-js', {
+            particles: {
+                number: { value: 80, density: { enable: true, value_area: 800 } },
+                color: { value: '#6a5af9' },
+                shape: { type: 'circle', stroke: { width: 0, color: '#000000' } },
+                opacity: { value: 0.5, random: false },
+                size: { value: 3, random: true },
+                line_linked: { enable: true, distance: 150, color: '#4a00e0', opacity: 0.2, width: 1 },
+                move: { enable: true, speed: 2, direction: 'none', random: false, straight: false, out_mode: 'out' }
+            },
+            interactivity: {
+                detect_on: 'canvas',
+                events: { onhover: { enable: true, mode: 'grab' }, onclick: { enable: true, mode: 'push' }, resize: true },
+                modes: { grab: { distance: 140, line_linked: { opacity: 1 } }, push: { particles_nb: 4 } }
+            },
+            retina_detect: true
+        });
+
+        // Attendance Calculator
+        const totalLecturesInput = document.getElementById('total-lectures');
+        const attendedLecturesInput = document.getElementById('attended-lectures');
+        const calculateBtn = document.getElementById('calculate-btn');
+        const calculatorResult = document.getElementById('calculator-result');
+        const attendancePercentage = document.getElementById('attendance-percentage');
+        const resultMessage = document.getElementById('result-message');
+        const attendanceStatus = document.getElementById('attendance-status');
+        
+        calculateBtn.addEventListener('click', async () => {
+            const totalLectures = parseInt(totalLecturesInput.value);
+            const attendedLectures = parseInt(attendedLecturesInput.value);
+            
+            try {
+                const response = await fetch(`/api/student/${studentId}`);
+                const student = await response.json();
+                document.getElementById('student-name').value = student.name;
+                const percentage = student.total_lectures > 0 ? (student.attended_lectures / student.total_lectures * 100).toFixed(1) : 0;
+                document.getElementById('student-attendance').value = `${percentage}%`;
+                if (percentage < 75) {
+                    const requiredLectures = Math.ceil((75 * student.total_lectures - 100 * student.attended_lectures) / (100 - 75));
+                    document.getElementById('student-required').value = `${requiredLectures} more lectures needed`;
+                } else {
+                    document.getElementById('student-required').value = 'Meeting attendance requirement';
+                }
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    attendancePercentage.textContent = `${data.percentage}%`;
+                    resultMessage.textContent = data.message;
+                    attendanceStatus.textContent = data.status;
+                    attendanceStatus.className = `attendance-status status-${data.status.toLowerCase()}`;
+                    
+                    calculatorResult.classList.add('show');
+                    
+                    gsap.from(calculatorResult, {
+                        y: 30,
+                        opacity: 0,
+                        duration: 0.5,
+                        ease: "power2.out"
+                    });
+                } else {
+                    showNotification(data.error || 'Invalid input');
+                }
+            } catch (error) {
+                showNotification('Error calculating attendance');
+            }
+        });
+
+        // Modal functionality
+        const modal = document.getElementById('student-modal');
+        const closeModal = document.querySelector('.close-modal');
+        const actionButtons = document.querySelectorAll('.action-btn');
+        
+        actionButtons.forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+                const studentId = e.target.dataset.id;
+                try {
+                    const response = await fetch(`/api/student/${studentId}`);
+                    const student = await response.json();
+                    
+                    document.getElementById('student-name').value = student.name;
+                    const percentage = student.total_lectures > 0 ? (student.attended_lectures / student.total_lectures * 100).toFixed(1) : 0;
+                    document.getElementById('student-attendance').value = `${percentage}%`;
+                    
+                    if (percentage < 75) {
+                        const requiredLectures = Math.ceil((75 * student.total_lectures - 100 * student.attended_lectures) / (100 - 75));
+                        document.getElementById('student-required').value = `${requiredLectures} more lectures needed`;
+                    } else {
+                        document.getElementById('student-required').value = 'Meeting attendance requirement';
+                    }
+                    
+                    modal.style.display = 'flex';
+                    
+                    gsap.from('.modal-content', {
+                        scale: 0.8,
+                        opacity: 0,
+                        duration: 0.3,
+                        ease: "back.out(1.7)"
+                    });
+                } catch (error) {
+                    showNotification('Error loading student data');
+                }
+            });
+        });
+        
+        closeModal.addEventListener('click', () => {
+            gsap.to('.modal-content', {
+                scale: 0.8,
+                opacity: 0,
+                duration: 0.2,
+                onComplete: () => {
+                    modal.style.display = 'none';
+                }
+            });
+        });
+        
+        window.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                gsap.to('.modal-content', {
+                    scale: 0.8,
+                    opacity: 0,
+                    duration: 0.2,
+                    onComplete: () => {
+                        modal.style.display = 'none';
+                    }
+                });
+            }
+        });
+
+        // Filter functionality
+        const filterButtons = document.querySelectorAll('.filter-btn');
+        const tableRows = document.querySelectorAll('.students-table tbody tr');
+        
+        filterButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                filterButtons.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                
+                const filter = btn.textContent.trim();
+                
+                tableRows.forEach(row => {
+                    const status = row.querySelector('.status-badge').textContent.trim();
+                    
+                    if (filter === 'All Students') {
+                        row.style.display = '';
+                    } else if (filter === 'Defaulters' && status === 'Defaulter') {
+                        row.style.display = '';
+                    } else if (filter === 'Good Standing' && status === 'Good') {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+            });
+        });
+
+        // Notification function
+        function showNotification(message) {
+            const notification = document.getElementById('notification');
+            const notificationContent = notification.querySelector('.notification-content');
+            
+            notificationContent.innerHTML = `<strong>Alert!</strong> ${message}`;
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                const targetId = this.getAttribute('href');
+                const targetElement = document.querySelector(targetId);
+                
+                if (targetElement) {
+                    window.scrollTo({
+                        top: targetElement.offsetTop - 80,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+
+        // Enhanced Statistics Charts
+        function createAttendanceChart() {
+            const chartContainer = document.getElementById('attendance-chart');
+            
+            const data = [
+                { label: 'Above 90%', value: {{ above_90 }}, color: '#4CAF50' },
+                { label: '75-90%', value: {{ between_75_90 }}, color: '#8e2de2' },
+                { label: '65-75%', value: {{ between_65_75 }}, color: '#FF9800' },
+                { label: 'Below 65%', value: {{ below_65 }}, color: '#f44336' }
+            ];
+            
+            const total = data.reduce((acc, item) => acc + item.value, 0);
+            let startAngle = 0;
+            
+            const svgNS = "http://www.w3.org/2000/svg";
+            const svg = document.createElementNS(svgNS, "svg");
+            svg.setAttribute("viewBox", "-100 -100 200 200");
+            svg.style.width = "100%";
+            svg.style.height = "100%";
+            
+            const title = document.createElementNS(svgNS, "text");
+            title.setAttribute("x", "0");
+            title.setAttribute("y", "-80");
+            title.setAttribute("text-anchor", "middle");
+            title.setAttribute("fill", "#ffffff");
+            title.setAttribute("font-size", "8");
+            title.textContent = "Attendance Distribution";
+            svg.appendChild(title);
+            
+            const chartGroup = document.createElementNS(svgNS, "g");
+            svg.appendChild(chartGroup);
+            
+            const legendGroup = document.createElementNS(svgNS, "g");
+            legendGroup.setAttribute("transform", "translate(70, -50)");
+            svg.appendChild(legendGroup);
+            
+            data.forEach((item, index) => {
+                const percentage = total > 0 ? item.value / total : 0;
+                const endAngle = startAngle + percentage * 360;
+                
+                const segment = createPieSegment(startAngle, endAngle, 0, 0, 60, item.color);
+                chartGroup.appendChild(segment);
+                
+                gsap.from(segment, {
+                    opacity: 0,
+                    scale: 0.8,
+                    transformOrigin: "center",
+                    duration: 0.8,
+                    delay: index * 0.1,
+                    ease: "elastic.out(1, 0.8)"
+                });
+                
+                const legendItem = document.createElementNS(svgNS, "g");
+                legendItem.setAttribute("transform", `translate(0, ${index * 15})`);
+                
+                const legendRect = document.createElementNS(svgNS, "rect");
+                legendRect.setAttribute("width", "8");
+                legendRect.setAttribute("height", "8");
+                legendRect.setAttribute("fill", item.color);
+                legendItem.appendChild(legendRect);
+                
+                const legendText = document.createElementNS(svgNS, "text");
+                legendText.setAttribute("x", "12");
+                legendText.setAttribute("y", "7");
+                legendText.setAttribute("fill", "#ffffff");
+                legendText.setAttribute("font-size", "6");
+                legendText.textContent = `${item.label} (${item.value})`;
+                legendItem.appendChild(legendText);
+                
+                legendGroup.appendChild(legendItem);
+                
+                gsap.from(legendItem, {
+                    opacity: 0,
+                    x: -20,
+                    duration: 0.5,
+                    delay: 0.8 + index * 0.1,
+                    ease: "power3.out"
+                });
+                
+                startAngle = endAngle;
+            });
+            
+            chartContainer.appendChild(svg);
+            
+            const innerCircle = document.createElementNS(svgNS, "circle");
+            innerCircle.setAttribute("cx", "0");
+            innerCircle.setAttribute("cy", "0");
+            innerCircle.setAttribute("r", "40");
+            innerCircle.setAttribute("fill", "rgba(255, 255, 255, 0.05)");
+            innerCircle.setAttribute("stroke", "rgba(255, 255, 255, 0.2)");
+            innerCircle.setAttribute("stroke-width", "0.5");
+            chartGroup.appendChild(innerCircle);
+            
+            const centralText1 = document.createElementNS(svgNS, "text");
+            centralText1.setAttribute("x", "0");
+            centralText1.setAttribute("y", "-5");
+            centralText1.setAttribute("text-anchor", "middle");
+            centralText1.setAttribute("fill", "#ffffff");
+            centralText1.setAttribute("font-size", "10");
+            centralText1.textContent = "{{ avg_attendance }}%";
+            
+            const centralText2 = document.createElementNS(svgNS, "text");
+            centralText2.setAttribute("x", "0");
+            centralText2.setAttribute("y", "10");
+            centralText2.setAttribute("text-anchor", "middle");
+            centralText2.setAttribute("fill", "rgba(255, 255, 255, 0.7)");
+            centralText2.setAttribute("font-size", "6");
+            centralText2.textContent = "Average";
+            
+            chartGroup.appendChild(centralText1);
+            chartGroup.appendChild(centralText2);
+            
+            gsap.from([centralText1, centralText2], {
+                opacity: 0,
+                scale: 0,
+                transformOrigin: "center",
+                duration: 1,
+                delay: 1.2,
+                ease: "elastic.out(1, 0.8)"
+            });
+        }
+
+        function createTrendChart() {
+            const chartContainer = document.getElementById('trend-chart');
+            
+            const data = [
+                { month: 'Jan', attendance: 78 },
+                { month: 'Feb', attendance: 80 },
+                { month: 'Mar', attendance: 82 },
+                { month: 'Apr', attendance: 81 },
+                { month: 'May', attendance: 82 }
+            ];
+            
+            const svgNS = "http://www.w3.org/2000/svg";
+            const svg = document.createElementNS(svgNS, "svg");
+            svg.setAttribute("viewBox", "0 0 300 200");
+            svg.style.width = "100%";
+            svg.style.height = "100%";
+            
+            const title = document.createElementNS(svgNS, "text");
+            title.setAttribute("x", "150");
+            title.setAttribute("y", "20");
+            title.setAttribute("text-anchor", "middle");
+            title.setAttribute("fill", "#ffffff");
+            title.setAttribute("font-size", "12");
+            title.textContent = "Attendance Trend";
+            svg.appendChild(title);
+            
+            const chartGroup = document.createElementNS(svgNS, "g");
+            chartGroup.setAttribute("transform", "translate(30, 30)");
+            svg.appendChild(chartGroup);
+            
+            for (let i = 0; i <= 4; i++) {
+                const y = 120 - (i * 30);
+                const line = document.createElementNS(svgNS, "line");
+                line.setAttribute("x1", "0");
+                line.setAttribute("y1", y);
+                line.setAttribute("x2", "240");
+                line.setAttribute("y2", y);
+                line.setAttribute("stroke", "rgba(255, 255, 255, 0.1)");
+                line.setAttribute("stroke-width", "0.5");
+                chartGroup.appendChild(line);
+                
+                const label = document.createElementNS(svgNS, "text");
+                label.setAttribute("x", "-20");
+                label.setAttribute("y", y + 4);
+                label.setAttribute("fill", "rgba(255, 255, 255, 0.7)");
+                label.setAttribute("font-size", "8");
+                label.textContent = `${70 + i * 5}%`;
+                chartGroup.appendChild(label);
+            }
+            
+            data.forEach((item, index) => {
+                const x = index * 60;
+                const label = document.createElementNS(svgNS, "text");
+                label.setAttribute("x", x);
+                label.setAttribute("y", "130");
+                label.setAttribute("text-anchor", "middle");
+                label.setAttribute("fill", "rgba(255, 255, 255, 0.7)");
+                label.setAttribute("font-size", "8");
+                label.textContent = item.month;
+                chartGroup.appendChild(label);
+            });
+            
+            const points = data.map((item, index) => {
+                const x = index * 60;
+                const y = 120 - ((item.attendance - 70) * 6);
+                return `${x},${y}`;
+            }).join(" ");
+            
+            const path = document.createElementNS(svgNS, "path");
+            path.setAttribute("d", `M ${points}`);
+            path.setAttribute("fill", "none");
+            path.setAttribute("stroke", "#6a5af9");
+            path.setAttribute("stroke-width", "2");
+            chartGroup.appendChild(path);
+            
+            const pathLength = path.getTotalLength();
+            path.style.strokeDasharray = pathLength;
+            path.style.strokeDashoffset = pathLength;
+            
+            gsap.to(path, {
+                strokeDashoffset: 0,
+                duration: 1.5,
+                ease: "power2.out"
+            });
+            
+            data.forEach((item, index) => {
+                const x = index * 60;
+                const y = 120 - ((item.attendance - 70) * 6);
+                
+                const circle = document.createElementNS(svgNS, "circle");
+                circle.setAttribute("cx", x);
+                circle.setAttribute("cy", y);
+                circle.setAttribute("r", "4");
+                circle.setAttribute("fill", "#6a5af9");
+                chartGroup.appendChild(circle);
+                
+                gsap.from(circle, {
+                    scale: 0,
+                    opacity: 0,
+                    duration: 0.5,
+                    delay: index * 0.2,
+                    ease: "elastic.out(1, 0.8)"
+                });
+            });
+            
+            chartContainer.appendChild(svg);
+        }
+
+        function createPieSegment(startAngle, endAngle, cx, cy, radius, color) {
+            const svgNS = "http://www.w3.org/2000/svg";
+            const path = document.createElementNS(svgNS, "path");
+            
+            const startRad = (Math.PI * startAngle) / 180;
+            const endRad = (Math.PI * endAngle) / 180;
+            
+            const x1 = cx + radius * Math.cos(startRad);
+            const y1 = cy + radius * Math.sin(startRad);
+            const x2 = cx + radius * Math.cos(endRad);
+            const y2 = cy + radius * Math.sin(endRad);
+            
+            const largeArc = endAngle - startAngle <= 180 ? 0 : 1;
+            
+            const d = [
+                `M ${cx} ${cy}`,
+                `L ${x1} ${y1}`,
+                `A ${radius} ${radius} 0 ${largeArc} 1 ${x2} ${y2}`,
+                `Z`
+            ].join(" ");
+            
+            path.setAttribute("d", d);
+            path.setAttribute("fill", color);
+            path.setAttribute("stroke", "rgba(255, 255, 255, 0.1)");
+            path.setAttribute("stroke-width", "0.5");
+            
+            return path;
+        }
+
+        // Initialize charts
+        createAttendanceChart();
+        createTrendChart();
+    </script>
+</body>
+</html>

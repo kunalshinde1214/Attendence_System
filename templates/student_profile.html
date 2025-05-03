@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Profile - AttendAlert</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4a00e0;
+            --secondary: #8e2de2;
+            --accent: #6a5af9;
+            --text: #f5f5f5;
+            --dark: #121212;
+            --light: #ffffff;
+            --success: #4CAF50;
+            --warning: #FF9800;
+            --danger: #f44336;
+            --shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+        }
+
+        body {
+            background-color: var(--dark);
+            color: var(--text);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        .profile-container {
+            max-width: 800px;
+            margin: 5rem auto;
+            padding: 2rem;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .profile-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .profile-header h2 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .profile-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .profile-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .profile-item label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        .profile-item span {
+            font-size: 1.2rem;
+        }
+
+        .attendance-status {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            font-weight: 600;
+            margin-top: 1rem;
+        }
+
+        .status-good {
+            background: rgba(76, 175, 80, 0.2);
+            border: 1px solid rgba(76, 175, 80, 0.5);
+            color: #4CAF50;
+        }
+
+        .status-warning {
+            background: rgba(255, 152, 0, 0.2);
+            border: 1px solid rgba(255, 152, 0, 0.5);
+            color: #FF9800;
+        }
+
+        .status-danger {
+            background: rgba(244, 67, 54, 0.2);
+            border: 1px solid rgba(244, 67, 54, 0.5);
+            color: #f44336;
+        }
+
+        .btn {
+            padding: 0.6rem 1.5rem;
+            border-radius: 50px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            font-size: 0.9rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: transform 0.3s, box-shadow 0.3s;
+            background: var(--primary);
+            color: var(--light);
+            text-decoration: none;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .flash-message {
+            background: rgba(244, 67, 54, 0.2);
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="profile-container">
+        <div class="profile-header">
+            <h2>Student Profile</h2>
+            <p>Welcome, {{ student.name }}</p>
+        </div>
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="flash-message">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        <div class="profile-details">
+            <div class="profile-item">
+                <label>Student ID</label>
+                <span>{{ student.student_id }}</span>
+            </div>
+            <div class="profile-item">
+                <label>Name</label>
+                <span>{{ student.name }}</span>
+            </div>
+            <div class="profile-item">
+                <label>Total Lectures</label>
+                <span>{{ student.total_lectures }}</span>
+            </div>
+            <div class="profile-item">
+                <label>Attended Lectures</label>
+                <span>{{ student.attended_lectures }}</span>
+            </div>
+            <div class="profile-item">
+                <label>Attendance Percentage</label>
+                <span>{{ "%.1f" % attendance_percentage }}%</span>
+            </div>
+            <div class="profile-item">
+                <label>Status</label>
+                {% set status = 'Good' if attendance_percentage >= 75 else 'Warning' if attendance_percentage >= 70 else 'Defaulter' %}
+                <span class="attendance-status status-{{ status.lower() }}">{{ status }}</span>
+            </div>
+        </div>
+        <div style="text-align: center;">
+            <a href="{{ url_for('logout') }}" class="btn"><i class="fas fa-sign-out-alt"></i> Logout</a>
+        </div>
+    </div>
+</body>
+</html>
